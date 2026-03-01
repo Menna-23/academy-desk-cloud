@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, BarChart2, X } from 'lucide-react';
+import { ArrowLeft, BarChart2, X, Plus, Upload } from 'lucide-react';
 import DashboardLayout from '@/components/DashboardLayout';
 import StatusBadge from '@/components/StatusBadge';
 import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
 import { courses, lessons, lessonStats } from '@/data/mockData';
 import { LayoutDashboard, BookOpen, Users, Award, FileQuestion } from 'lucide-react';
 
@@ -18,8 +19,11 @@ const navItems = [
 export default function CourseDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [statsModalOpen, setStatsModalOpen] = useState(false);
   const [selectedLesson, setSelectedLesson] = useState<string | null>(null);
+  const [addLessonOpen, setAddLessonOpen] = useState(false);
+  const [entryTestEnabled, setEntryTestEnabled] = useState(false);
 
   const course = courses.find(c => c.id === id);
   const courseLessons = lessons.filter(l => l.courseId === id);
@@ -50,9 +54,14 @@ export default function CourseDetail() {
       ]}
     >
       <div className="animate-fade-in space-y-6">
-        <button onClick={() => navigate('/teacher')} className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition">
-          <ArrowLeft className="w-4 h-4" /> Back to Courses
-        </button>
+        <div className="flex items-center justify-between">
+          <button onClick={() => navigate('/teacher')} className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition">
+            <ArrowLeft className="w-4 h-4" /> Back to Courses
+          </button>
+          <button onClick={() => setAddLessonOpen(true)} className="inline-flex items-center gap-1.5 px-4 py-2 bg-secondary text-secondary-foreground rounded-lg text-sm font-semibold hover:opacity-90 transition">
+            <Plus className="w-4 h-4" /> Add Lesson
+          </button>
+        </div>
 
         <div className="bg-card rounded-lg p-6 shadow-card border border-border">
           <h2 className="text-xl font-bold text-foreground mb-1">{course.title}</h2>
@@ -148,6 +157,79 @@ export default function CourseDetail() {
                 </tbody>
               </table>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Lesson Drawer */}
+      {addLessonOpen && (
+        <div className="fixed inset-0 z-50 flex justify-end">
+          <div className="absolute inset-0 bg-foreground/20" onClick={() => setAddLessonOpen(false)} />
+          <div className="relative w-full max-w-md bg-card shadow-elevated animate-slide-in-right border-l border-border overflow-auto">
+            <div className="flex items-center justify-between p-5 border-b border-border">
+              <h3 className="font-semibold text-card-foreground">Add Lesson</h3>
+              <button onClick={() => setAddLessonOpen(false)} className="p-1 rounded hover:bg-muted transition"><X className="w-4 h-4" /></button>
+            </div>
+            <form onSubmit={e => { e.preventDefault(); toast({ title: 'Lesson Saved!', description: 'New lesson has been created.' }); setAddLessonOpen(false); }} className="p-5 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Lesson Title *</label>
+                <input required className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground text-sm focus:ring-2 focus:ring-secondary focus:outline-none" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Attachment Upload</label>
+                <div className="flex items-center gap-2 p-3 border border-dashed border-border rounded-lg bg-muted/30">
+                  <Upload className="w-4 h-4 text-muted-foreground" />
+                  <input type="file" className="text-sm text-muted-foreground flex-1" />
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">Upload any file (PDF, video, doc, etc.)</p>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Availability (days)</label>
+                  <input type="number" defaultValue={14} className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground text-sm focus:ring-2 focus:ring-secondary focus:outline-none" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Max Views</label>
+                  <input type="number" defaultValue={5} className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground text-sm focus:ring-2 focus:ring-secondary focus:outline-none" />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Homework Attachment</label>
+                <div className="flex items-center gap-2 p-3 border border-dashed border-border rounded-lg bg-muted/30">
+                  <Upload className="w-4 h-4 text-muted-foreground" />
+                  <input type="file" className="text-sm text-muted-foreground flex-1" />
+                </div>
+              </div>
+              <div>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" checked={entryTestEnabled} onChange={e => setEntryTestEnabled(e.target.checked)} className="rounded" />
+                  <span className="text-sm font-medium text-foreground">Enable Entry Test</span>
+                </label>
+              </div>
+              {entryTestEnabled && (
+                <div className="bg-muted rounded-lg p-4 space-y-3">
+                  <p className="text-xs font-semibold text-foreground">Test Configuration</p>
+                  <div>
+                    <label className="block text-xs text-muted-foreground mb-1">Upload Test Form</label>
+                    <div className="flex items-center gap-2 p-2 border border-dashed border-border rounded-lg bg-background">
+                      <Upload className="w-3.5 h-3.5 text-muted-foreground" />
+                      <input type="file" className="text-xs text-muted-foreground flex-1" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs text-muted-foreground mb-1">Passing Score %</label>
+                      <input type="number" defaultValue={60} className="w-full px-2 py-1.5 rounded border border-border bg-background text-foreground text-sm" />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-muted-foreground mb-1">Retake Interval (hrs)</label>
+                      <input type="number" defaultValue={24} className="w-full px-2 py-1.5 rounded border border-border bg-background text-foreground text-sm" />
+                    </div>
+                  </div>
+                </div>
+              )}
+              <button type="submit" className="w-full py-2.5 bg-secondary text-secondary-foreground rounded-lg text-sm font-semibold hover:opacity-90 transition">Save Lesson</button>
+            </form>
           </div>
         </div>
       )}

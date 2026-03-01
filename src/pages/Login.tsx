@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { centers, getCredentials } from '@/data/mockData';
+import { getCredentials } from '@/data/mockData';
 import { GraduationCap, Eye, EyeOff, LogIn, Info } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -9,27 +9,19 @@ const roles = ['admin', 'moderator', 'teacher'] as const;
 const roleLabels = { admin: 'Institution Admin', moderator: 'Moderator', teacher: 'Teacher' };
 
 export default function Login() {
-  const [centerId, setCenterId] = useState('alnour');
   const [role, setRole] = useState<typeof roles[number]>('admin');
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const { login } = useAuth();
   const { toast } = useToast();
 
-  const creds = getCredentials(centerId, role);
+  const creds = getCredentials('alnour', role);
   const [username, setUsername] = useState(creds.username);
   const [password, setPassword] = useState(creds.password);
 
-  const handleCenterChange = (newCenterId: string) => {
-    setCenterId(newCenterId);
-    const c = getCredentials(newCenterId, role);
-    setUsername(c.username);
-    setPassword(c.password);
-  };
-
   const handleRoleChange = (newRole: typeof roles[number]) => {
     setRole(newRole);
-    const c = getCredentials(centerId, newRole);
+    const c = getCredentials('alnour', newRole);
     setUsername(c.username);
     setPassword(c.password);
   };
@@ -48,8 +40,6 @@ export default function Login() {
       toast({ title: 'Login Failed', description: 'Invalid credentials', variant: 'destructive' });
     }
   };
-
-  const centerName = centers.find(c => c.id === centerId)?.name || '';
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-navy p-4 relative overflow-hidden">
@@ -74,20 +64,6 @@ export default function Login() {
         {/* Login Card */}
         <div className="bg-card rounded-2xl shadow-login p-7">
           <form onSubmit={handleLogin} className="space-y-5">
-            {/* Center Selector */}
-            <div>
-              <label className="block text-sm font-semibold text-card-foreground mb-1.5">Select Your Institution</label>
-              <select
-                value={centerId}
-                onChange={e => handleCenterChange(e.target.value)}
-                className="w-full px-3 py-2.5 rounded-lg border border-border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent transition"
-              >
-                {centers.map(c => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
-                ))}
-              </select>
-            </div>
-
             {/* Role Selector */}
             <div>
               <label className="block text-sm font-semibold text-card-foreground mb-1.5">Select Your Role</label>
@@ -161,7 +137,7 @@ export default function Login() {
           </div>
           <div className="bg-card/10 rounded-lg p-3">
             <p className="text-primary-foreground/60 text-xs mb-1">
-              <span className="font-medium text-primary-foreground/80">{centerName}</span> — {roleLabels[role]}
+              <span className="font-medium text-primary-foreground/80">Al-Nour Educational Center</span> — {roleLabels[role]}
             </p>
             <p className="text-primary-foreground/90 text-sm font-mono">
               {creds.username} / {creds.password}

@@ -1,7 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import DashboardLayout from '@/components/DashboardLayout';
-import StatusBadge from '@/components/StatusBadge';
 import { students, studentLessonProgress } from '@/data/mockData';
 import { LayoutDashboard, BookOpen, Users, Award, FileQuestion } from 'lucide-react';
 
@@ -20,11 +19,11 @@ const scoreColor = (s: number | null) => {
   return 'text-status-failed';
 };
 
-const resultIcon: Record<string, string> = {
-  'Completed': '✓',
-  'Passed': '✓',
-  'Pending': '⏳',
-  'Locked': '🔒',
+const resultLabel: Record<string, string> = {
+  'Completed': '✓ Completed',
+  'Passed': '✓ Passed',
+  'Pending': '⏳ Pending',
+  'Locked': '🔒 Locked',
 };
 
 export default function StudentProgress() {
@@ -116,7 +115,7 @@ export default function StudentProgress() {
                     )}
                   </td>
                   <td className="px-4 py-3">
-                    <StatusBadge status={l.result as any} />
+                    <span className="text-sm">{resultLabel[l.result] || l.result}</span>
                   </td>
                   <td className="px-4 py-3">
                     {l.homeworkGrade !== null ? (
