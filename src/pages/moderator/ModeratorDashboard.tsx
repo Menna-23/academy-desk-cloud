@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Users, Link2, Activity, Plus, Eye, UserPlus, ToggleLeft, X, Copy, ArrowRight, ArrowLeft, Check, Search } from 'lucide-react';
+import { LayoutDashboard, Users, Link2, Activity, Plus, Eye, UserPlus, X, Copy, ArrowRight, ArrowLeft, Check, Search } from 'lucide-react';
 import DashboardLayout from '@/components/DashboardLayout';
 import StatCard from '@/components/StatCard';
-import StatusBadge from '@/components/StatusBadge';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { getStudentsForCenter, getTeachersForCenter, students as allStudents, studentsPerTeacher, moderatorActivities } from '@/data/mockData';
+import { getStudentsForCenter, getTeachersForCenter, students as allStudents, studentsPerTeacher, moderatorActivities, users } from '@/data/mockData';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 
 const CHART_COLORS = ['hsl(217,91%,53%)', 'hsl(216,57%,25%)', 'hsl(199,89%,48%)', 'hsl(142,71%,45%)', 'hsl(38,92%,50%)'];
@@ -18,20 +17,29 @@ const navItems = [
   { label: 'Activity', icon: Activity },
 ];
 
+const EDUCATION_LEVELS = ['Primary', 'Preparatory', 'Secondary'];
+
 export default function ModeratorDashboard() {
   const [tab, setTab] = useState('Overview');
-  const { center } = useAuth();
+  const { center, user: currentUser } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [teacherFilter, setTeacherFilter] = useState('all');
   const [addStudentOpen, setAddStudentOpen] = useState(false);
   const [addStudentStep, setAddStudentStep] = useState(1);
-  const [studentForm, setStudentForm] = useState({ name: '', email: '', phone: '' });
+  const [studentForm, setStudentForm] = useState({ name: '', email: '', phone: '', educationLevel: 'Secondary', parentPhone: '' });
   const [selectedTeachers, setSelectedTeachers] = useState<string[]>([]);
+  const [addTeacherModal, setAddTeacherModal] = useState<string | null>(null); // student id
 
   const studentList = getStudentsForCenter(center?.id || '');
-  const teachers = getTeachersForCenter(center?.id || '');
+  const allTeachers = getTeachersForCenter(center?.id || '');
+
+  // Get teachers assigned to this moderator
+  const moderatorUser = currentUser ? users.find(u => u.id === currentUser.id) : null;
+  const assignedTeacherIds = moderatorUser?.assignedTeachers || [];
+  const assignedTeachers = allTeachers.filter(t => assignedTeacherIds.includes(t.id));
+  const displayTeachers = assignedTeachers.length > 0 ? assignedTeachers : allTeachers;
 
   const filtered = studentList.filter(s => {
     const matchSearch = s.name.toLowerCase().includes(search.toLowerCase());
@@ -46,13 +54,24 @@ export default function ModeratorDashboard() {
     toast({ title: 'Student Created!', description: 'Student account created. Share credentials with the student.' });
     setAddStudentOpen(false);
     setAddStudentStep(1);
-    setStudentForm({ name: '', email: '', phone: '' });
+    setStudentForm({ name: '', email: '', phone: '', educationLevel: 'Secondary', parentPhone: '' });
     setSelectedTeachers([]);
   };
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     toast({ title: 'Copied!', description: 'Copied to clipboard.' });
+  };
+
+  const handleAddTeacherToStudent = (studentId: string, teacherId: string) => {
+    toast({ title: 'Teacher Assigned!', description: `Teacher assigned to student successfully.` });
+    setAddTeacherModal(null);
+  };
+
+  const scoreColor = (s: number) => {
+    if (s >= 80) return 'text-status-active';
+    if (s >= 60) return 'text-status-pending';
+    return 'text-status-failed';
   };
 
   return (
@@ -65,6 +84,25 @@ export default function ModeratorDashboard() {
             <StatCard title="Pending Requests" value={3} icon={Activity} color="orange" />
             <StatCard title="New This Month" value={11} icon={UserPlus} color="green" />
           </div>
+
+          {/* Assigned Teachers */}
+          {assignedTeachers.length > 0 && (
+            <div className="bg-card rounded-lg p-5 shadow-card border border-border">
+              <h3 className="text-sm font-semibold text-card-foreground mb-3">My Assigned Teachers</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {assignedTeachers.map(t => (
+                  <div key={t.id} className="flex items-center gap-3 p-3 rounded-lg border border-border bg-muted/30">
+                    <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary">{t.avatar}</div>
+                    <div>
+                      <p className="text-sm font-medium text-foreground">{t.name}</p>
+                      <p className="text-xs text-muted-foreground">{t.subject}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="bg-card rounded-lg p-5 shadow-card border border-border">
               <h3 className="text-sm font-semibold text-card-foreground mb-4">Students per Teacher</h3>
@@ -90,7 +128,6 @@ export default function ModeratorDashboard() {
                         </div>
                       </td>
                       <td className="py-2 text-muted-foreground text-xs">{s.joinedDate}</td>
-                      <td className="py-2"><StatusBadge status={s.status} /></td>
                     </tr>
                   ))}
                 </tbody>
@@ -119,7 +156,7 @@ export default function ModeratorDashboard() {
                 className="px-3 py-2 rounded-lg border border-border bg-background text-foreground text-sm focus:ring-2 focus:ring-secondary focus:outline-none"
               >
                 <option value="all">All Teachers</option>
-                {teachers.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                {displayTeachers.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
               </select>
             </div>
             <button onClick={() => { setAddStudentOpen(true); setAddStudentStep(1); }} className="inline-flex items-center gap-1.5 px-4 py-2 bg-secondary text-secondary-foreground rounded-lg text-sm font-semibold hover:opacity-90 transition">
@@ -130,10 +167,12 @@ export default function ModeratorDashboard() {
             <table className="w-full text-sm">
               <thead><tr className="border-b border-border bg-muted/50">
                 <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Student</th>
+                <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Education Level</th>
                 <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Teachers</th>
                 <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Subjects</th>
+                <th className="text-left px-4 py-3 font-semibold text-muted-foreground">AVG. Score</th>
+                <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Missing Days</th>
                 <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Joined</th>
-                <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Status</th>
                 <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Actions</th>
               </tr></thead>
               <tbody>
@@ -145,17 +184,18 @@ export default function ModeratorDashboard() {
                         <span className="font-medium text-foreground">{s.name}</span>
                       </div>
                     </td>
+                    <td className="px-4 py-3 text-muted-foreground text-xs">{s.educationLevel}</td>
                     <td className="px-4 py-3 text-muted-foreground text-xs">
-                      {s.enrolledTeachers.map(tid => teachers.find(t => t.id === tid)?.name || tid).join(', ')}
+                      {s.enrolledTeachers.map(tid => displayTeachers.find(t => t.id === tid)?.name || allTeachers.find(t => t.id === tid)?.name || tid).join(', ')}
                     </td>
                     <td className="px-4 py-3 text-muted-foreground text-xs">{s.subjects.join(', ')}</td>
+                    <td className="px-4 py-3"><span className={`font-semibold ${scoreColor(s.avgScore)}`}>{s.avgScore}%</span></td>
+                    <td className="px-4 py-3 text-muted-foreground">{s.missingDays}</td>
                     <td className="px-4 py-3 text-muted-foreground text-xs">{s.joinedDate}</td>
-                    <td className="px-4 py-3"><StatusBadge status={s.status} /></td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1">
                         <button onClick={() => navigate(`/moderator/students/${s.id}`)} className="p-1.5 rounded hover:bg-muted transition" title="View"><Eye className="w-3.5 h-3.5 text-muted-foreground" /></button>
-                        <button className="p-1.5 rounded hover:bg-muted transition" title="Add Teacher"><UserPlus className="w-3.5 h-3.5 text-muted-foreground" /></button>
-                        <button className="p-1.5 rounded hover:bg-muted transition" title="Toggle Status"><ToggleLeft className="w-3.5 h-3.5 text-muted-foreground" /></button>
+                        <button onClick={() => setAddTeacherModal(s.id)} className="p-1.5 rounded hover:bg-muted transition" title="Add Teacher"><UserPlus className="w-3.5 h-3.5 text-muted-foreground" /></button>
                       </div>
                     </td>
                   </tr>
@@ -179,18 +219,16 @@ export default function ModeratorDashboard() {
                 <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Teacher</th>
                 <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Subject</th>
                 <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Date Enrolled</th>
-                <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Status</th>
               </tr></thead>
               <tbody>
                 {studentList.flatMap(s => s.enrolledTeachers.map((tid, i) => {
-                  const teacher = teachers.find(t => t.id === tid);
+                  const teacher = allTeachers.find(t => t.id === tid);
                   return (
                     <tr key={`${s.id}-${tid}`} className="border-b border-border last:border-0 hover:bg-muted/30 transition">
                       <td className="px-4 py-3 font-medium text-foreground">{s.name}</td>
                       <td className="px-4 py-3 text-muted-foreground">{teacher?.name || 'Unknown'}</td>
                       <td className="px-4 py-3 text-muted-foreground">{s.subjects[i] || teacher?.subject || ''}</td>
                       <td className="px-4 py-3 text-muted-foreground">{s.joinedDate}</td>
-                      <td className="px-4 py-3"><StatusBadge status={s.status} /></td>
                     </tr>
                   );
                 }))}
@@ -214,6 +252,41 @@ export default function ModeratorDashboard() {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Teacher to Student Modal */}
+      {addTeacherModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-foreground/20" onClick={() => setAddTeacherModal(null)} />
+          <div className="relative w-full max-w-sm bg-card rounded-xl shadow-elevated border border-border animate-fade-in">
+            <div className="flex items-center justify-between p-4 border-b border-border">
+              <h3 className="font-semibold text-card-foreground">Assign Teacher</h3>
+              <button onClick={() => setAddTeacherModal(null)} className="p-1 rounded hover:bg-muted transition"><X className="w-4 h-4" /></button>
+            </div>
+            <div className="p-4 space-y-2">
+              <p className="text-xs text-muted-foreground mb-3">Select a teacher to assign to this student.</p>
+              {displayTeachers.map(t => {
+                const student = studentList.find(s => s.id === addTeacherModal);
+                const alreadyAssigned = student?.enrolledTeachers.includes(t.id);
+                return (
+                  <button
+                    key={t.id}
+                    disabled={alreadyAssigned}
+                    onClick={() => handleAddTeacherToStudent(addTeacherModal, t.id)}
+                    className={`w-full text-left px-4 py-3 rounded-lg border transition flex items-center gap-3 ${alreadyAssigned ? 'border-border bg-muted/50 opacity-50 cursor-not-allowed' : 'border-border hover:bg-muted/50 cursor-pointer'}`}
+                  >
+                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary">{t.avatar}</div>
+                    <div>
+                      <p className="text-sm font-medium text-foreground">{t.name}</p>
+                      <p className="text-xs text-muted-foreground">{t.subject}</p>
+                    </div>
+                    {alreadyAssigned && <span className="ml-auto text-xs text-muted-foreground">Already assigned</span>}
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -251,6 +324,16 @@ export default function ModeratorDashboard() {
                     <label className="block text-sm font-medium text-muted-foreground mb-1">Phone Number</label>
                     <input value={studentForm.phone} onChange={e => setStudentForm(f => ({ ...f, phone: e.target.value }))} className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground text-sm focus:ring-2 focus:ring-secondary focus:outline-none" />
                   </div>
+                  <div>
+                    <label className="block text-sm font-medium text-muted-foreground mb-1">Education Level *</label>
+                    <select value={studentForm.educationLevel} onChange={e => setStudentForm(f => ({ ...f, educationLevel: e.target.value }))} className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground text-sm focus:ring-2 focus:ring-secondary focus:outline-none">
+                      {EDUCATION_LEVELS.map(l => <option key={l} value={l}>{l}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-muted-foreground mb-1">Parent Phone Number</label>
+                    <input value={studentForm.parentPhone} onChange={e => setStudentForm(f => ({ ...f, parentPhone: e.target.value }))} className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground text-sm focus:ring-2 focus:ring-secondary focus:outline-none" placeholder="+20 ..." />
+                  </div>
                 </div>
               )}
               {addStudentStep === 2 && (
@@ -258,7 +341,7 @@ export default function ModeratorDashboard() {
                   <h4 className="font-medium text-foreground">Assign Teachers</h4>
                   <p className="text-xs text-muted-foreground">Select at least one teacher.</p>
                   <div className="space-y-2">
-                    {teachers.map(t => (
+                    {displayTeachers.map(t => (
                       <label key={t.id} className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition ${selectedTeachers.includes(t.id) ? 'border-secondary bg-accent' : 'border-border hover:bg-muted/50'}`}>
                         <input
                           type="checkbox"
@@ -282,7 +365,9 @@ export default function ModeratorDashboard() {
                     <p><span className="text-muted-foreground">Name:</span> <span className="font-medium text-foreground">{studentForm.name}</span></p>
                     <p><span className="text-muted-foreground">Email:</span> <span className="font-medium text-foreground">{studentForm.email}</span></p>
                     <p><span className="text-muted-foreground">Phone:</span> <span className="font-medium text-foreground">{studentForm.phone || 'N/A'}</span></p>
-                    <p><span className="text-muted-foreground">Teachers:</span> <span className="font-medium text-foreground">{selectedTeachers.map(id => teachers.find(t => t.id === id)?.name).join(', ')}</span></p>
+                    <p><span className="text-muted-foreground">Education Level:</span> <span className="font-medium text-foreground">{studentForm.educationLevel}</span></p>
+                    <p><span className="text-muted-foreground">Parent Phone:</span> <span className="font-medium text-foreground">{studentForm.parentPhone || 'N/A'}</span></p>
+                    <p><span className="text-muted-foreground">Teachers:</span> <span className="font-medium text-foreground">{selectedTeachers.map(id => displayTeachers.find(t => t.id === id)?.name || allTeachers.find(t => t.id === id)?.name).join(', ')}</span></p>
                   </div>
                   <div className="bg-accent rounded-lg p-4 space-y-3">
                     <p className="text-xs font-semibold text-accent-foreground">Generated Credentials</p>

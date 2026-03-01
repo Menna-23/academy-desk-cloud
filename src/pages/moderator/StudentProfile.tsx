@@ -1,7 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Plus, Trash2, Users } from 'lucide-react';
 import DashboardLayout from '@/components/DashboardLayout';
-import StatusBadge from '@/components/StatusBadge';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { students, getTeachersForCenter } from '@/data/mockData';
@@ -60,14 +59,17 @@ export default function StudentProfile() {
         {/* Student Info */}
         <div className="bg-card rounded-lg p-6 shadow-card border border-border flex items-start gap-5">
           <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center text-lg font-bold text-primary">{student.avatar}</div>
-          <div className="space-y-1">
+          <div className="space-y-1 flex-1">
             <h2 className="text-xl font-bold text-foreground">{student.name}</h2>
             <p className="text-sm text-muted-foreground">@{student.username}</p>
-            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+            <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
               <span>{student.phone}</span>
               <span>Joined {student.joinedDate}</span>
             </div>
-            <StatusBadge status={student.status} />
+            <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mt-1">
+              <span><span className="font-medium text-foreground">Education Level:</span> {student.educationLevel}</span>
+              <span><span className="font-medium text-foreground">Parent Phone:</span> {student.parentPhone}</span>
+            </div>
           </div>
         </div>
 
@@ -117,7 +119,6 @@ export default function StudentProfile() {
                 <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Teacher</th>
                 <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Subject</th>
                 <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Date Enrolled</th>
-                <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Status</th>
               </tr></thead>
               <tbody>
                 {enrolledTeachers.map(t => (
@@ -125,7 +126,6 @@ export default function StudentProfile() {
                     <td className="px-4 py-3 font-medium text-foreground">{t.name}</td>
                     <td className="px-4 py-3 text-muted-foreground">{t.subject}</td>
                     <td className="px-4 py-3 text-muted-foreground">{student.joinedDate}</td>
-                    <td className="px-4 py-3"><StatusBadge status="Active" /></td>
                   </tr>
                 ))}
               </tbody>

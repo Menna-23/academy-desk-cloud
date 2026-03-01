@@ -1,11 +1,10 @@
 import { useState } from 'react';
-import { LayoutDashboard, Users, Shield, BarChart3, Settings, Plus, Pencil, Eye, ToggleLeft, X } from 'lucide-react';
+import { LayoutDashboard, Users, Shield, BarChart3, Settings, Plus, Pencil, Eye, X } from 'lucide-react';
 import DashboardLayout from '@/components/DashboardLayout';
 import StatCard from '@/components/StatCard';
-import StatusBadge from '@/components/StatusBadge';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { getUsersForCenter, adminActivities, enrollmentBySubject, monthlyEnrollments, studentsPerTeacher, subjectPassRates } from '@/data/mockData';
+import { getUsersForCenter, adminActivities, enrollmentBySubject, monthlyEnrollments, studentsPerTeacher, subjectPassRates, getTeachersForCenter } from '@/data/mockData';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell, Legend } from 'recharts';
 
 const CHART_COLORS = ['hsl(217,91%,53%)', 'hsl(216,57%,25%)', 'hsl(199,89%,48%)', 'hsl(142,71%,45%)', 'hsl(38,92%,50%)'];
@@ -25,15 +24,18 @@ export default function AdminDashboard() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerType, setDrawerType] = useState<'teacher' | 'moderator'>('teacher');
   const [editingUser, setEditingUser] = useState<any>(null);
+  const [selectedModTeachers, setSelectedModTeachers] = useState<string[]>([]);
 
   const teachers = getUsersForCenter(center?.id || '', 'teacher');
   const moderators = getUsersForCenter(center?.id || '', 'moderator');
+  const allTeachers = getTeachersForCenter(center?.id || '');
   const [teacherList, setTeacherList] = useState(teachers);
   const [modList, setModList] = useState(moderators);
 
   const openDrawer = (type: 'teacher' | 'moderator', user?: any) => {
     setDrawerType(type);
     setEditingUser(user || null);
+    setSelectedModTeachers(user?.assignedTeachers || []);
     setDrawerOpen(true);
   };
 
@@ -41,15 +43,6 @@ export default function AdminDashboard() {
     e.preventDefault();
     toast({ title: editingUser ? 'Updated!' : 'Created!', description: `${drawerType === 'teacher' ? 'Teacher' : 'Moderator'} account ${editingUser ? 'updated' : 'created'} successfully.` });
     setDrawerOpen(false);
-  };
-
-  const toggleStatus = (id: string, list: 'teacher' | 'moderator') => {
-    if (list === 'teacher') {
-      setTeacherList(prev => prev.map(t => t.id === id ? { ...t, status: t.status === 'Active' ? 'Inactive' as const : 'Active' as const } : t));
-    } else {
-      setModList(prev => prev.map(m => m.id === id ? { ...m, status: m.status === 'Active' ? 'Inactive' as const : 'Active' as const } : m));
-    }
-    toast({ title: 'Status Updated', description: 'User status has been changed.' });
   };
 
   return (
@@ -108,7 +101,6 @@ export default function AdminDashboard() {
                 <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Subject</th>
                 <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Students</th>
                 <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Courses</th>
-                <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Status</th>
                 <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Actions</th>
               </tr></thead>
               <tbody>
@@ -123,11 +115,9 @@ export default function AdminDashboard() {
                     <td className="px-4 py-3 text-muted-foreground">{t.subject}</td>
                     <td className="px-4 py-3 text-muted-foreground">{t.studentCount}</td>
                     <td className="px-4 py-3 text-muted-foreground">{t.courseCount}</td>
-                    <td className="px-4 py-3"><StatusBadge status={t.status} /></td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1">
                         <button onClick={() => openDrawer('teacher', t)} className="p-1.5 rounded hover:bg-muted transition" title="Edit"><Pencil className="w-3.5 h-3.5 text-muted-foreground" /></button>
-                        <button onClick={() => toggleStatus(t.id, 'teacher')} className="p-1.5 rounded hover:bg-muted transition" title="Toggle Status"><ToggleLeft className="w-3.5 h-3.5 text-muted-foreground" /></button>
                         <button className="p-1.5 rounded hover:bg-muted transition" title="View Profile"><Eye className="w-3.5 h-3.5 text-muted-foreground" /></button>
                       </div>
                     </td>
@@ -152,8 +142,8 @@ export default function AdminDashboard() {
               <thead><tr className="border-b border-border bg-muted/50">
                 <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Name</th>
                 <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Students Managed</th>
+                <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Assigned Teachers</th>
                 <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Last Active</th>
-                <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Status</th>
                 <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Actions</th>
               </tr></thead>
               <tbody>
@@ -166,12 +156,13 @@ export default function AdminDashboard() {
                       </div>
                     </td>
                     <td className="px-4 py-3 text-muted-foreground">{m.studentsManaged}</td>
+                    <td className="px-4 py-3 text-muted-foreground text-xs">
+                      {(m.assignedTeachers || []).map(tid => allTeachers.find(t => t.id === tid)?.name || tid).join(', ') || '—'}
+                    </td>
                     <td className="px-4 py-3 text-muted-foreground">{m.lastActive}</td>
-                    <td className="px-4 py-3"><StatusBadge status={m.status} /></td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1">
                         <button onClick={() => openDrawer('moderator', m)} className="p-1.5 rounded hover:bg-muted transition"><Pencil className="w-3.5 h-3.5 text-muted-foreground" /></button>
-                        <button onClick={() => toggleStatus(m.id, 'moderator')} className="p-1.5 rounded hover:bg-muted transition"><ToggleLeft className="w-3.5 h-3.5 text-muted-foreground" /></button>
                         <button className="p-1.5 rounded hover:bg-muted transition"><Eye className="w-3.5 h-3.5 text-muted-foreground" /></button>
                       </div>
                     </td>
@@ -215,20 +206,26 @@ export default function AdminDashboard() {
             <table className="w-full text-sm">
               <thead><tr className="border-b border-border bg-muted/50">
                 <th className="text-left px-4 py-2 font-semibold text-muted-foreground">Subject</th>
+                <th className="text-left px-4 py-2 font-semibold text-muted-foreground">Teacher</th>
                 <th className="text-left px-4 py-2 font-semibold text-muted-foreground">Enrolled</th>
                 <th className="text-left px-4 py-2 font-semibold text-muted-foreground">Passed</th>
                 <th className="text-left px-4 py-2 font-semibold text-muted-foreground">Pass Rate</th>
               </tr></thead>
               <tbody>
                 {subjectPassRates.map(s => (
-                  <tr key={s.subject} className="border-b border-border last:border-0">
-                    <td className="px-4 py-2 font-medium text-foreground">{s.subject}</td>
-                    <td className="px-4 py-2 text-muted-foreground">{s.enrolled}</td>
-                    <td className="px-4 py-2 text-muted-foreground">{s.passed}</td>
-                    <td className="px-4 py-2">
-                      <span className={`font-semibold ${s.rate >= 80 ? 'text-status-active' : s.rate >= 60 ? 'text-status-pending' : 'text-status-failed'}`}>{s.rate}%</span>
-                    </td>
-                  </tr>
+                  s.teachers.map((t, ti) => (
+                    <tr key={`${s.subject}-${ti}`} className="border-b border-border last:border-0">
+                      {ti === 0 && (
+                        <td className="px-4 py-2 font-medium text-foreground" rowSpan={s.teachers.length}>{s.subject}</td>
+                      )}
+                      <td className="px-4 py-2 text-muted-foreground">{t.name}</td>
+                      <td className="px-4 py-2 text-muted-foreground">{t.enrolled}</td>
+                      <td className="px-4 py-2 text-muted-foreground">{t.passed}</td>
+                      <td className="px-4 py-2">
+                        <span className={`font-semibold ${t.rate >= 80 ? 'text-status-active' : t.rate >= 60 ? 'text-status-pending' : 'text-status-failed'}`}>{t.rate}%</span>
+                      </td>
+                    </tr>
+                  ))
                 ))}
               </tbody>
             </table>
@@ -286,7 +283,7 @@ export default function AdminDashboard() {
       {drawerOpen && (
         <div className="fixed inset-0 z-50 flex justify-end">
           <div className="absolute inset-0 bg-foreground/20" onClick={() => setDrawerOpen(false)} />
-          <div className="relative w-full max-w-md bg-card shadow-elevated animate-slide-in-right border-l border-border">
+          <div className="relative w-full max-w-md bg-card shadow-elevated animate-slide-in-right border-l border-border overflow-auto">
             <div className="flex items-center justify-between p-5 border-b border-border">
               <h3 className="font-semibold text-card-foreground">{editingUser ? 'Edit' : 'Add'} {drawerType === 'teacher' ? 'Teacher' : 'Moderator'}</h3>
               <button onClick={() => setDrawerOpen(false)} className="p-1 rounded hover:bg-muted transition"><X className="w-4 h-4" /></button>
@@ -304,6 +301,28 @@ export default function AdminDashboard() {
                 <div>
                   <label className="block text-sm font-medium text-muted-foreground mb-1">Subject</label>
                   <input defaultValue={editingUser?.subject || ''} required className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground text-sm focus:ring-2 focus:ring-secondary focus:outline-none" />
+                </div>
+              )}
+              {drawerType === 'moderator' && (
+                <div>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Assign Teachers</label>
+                  <p className="text-xs text-muted-foreground mb-2">Select teachers this moderator will be responsible for.</p>
+                  <div className="space-y-2 max-h-48 overflow-auto">
+                    {allTeachers.map(t => (
+                      <label key={t.id} className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition ${selectedModTeachers.includes(t.id) ? 'border-secondary bg-accent' : 'border-border hover:bg-muted/50'}`}>
+                        <input
+                          type="checkbox"
+                          checked={selectedModTeachers.includes(t.id)}
+                          onChange={() => setSelectedModTeachers(prev => prev.includes(t.id) ? prev.filter(x => x !== t.id) : [...prev, t.id])}
+                          className="rounded border-border"
+                        />
+                        <div>
+                          <p className="text-sm font-medium text-foreground">{t.name}</p>
+                          <p className="text-xs text-muted-foreground">{t.subject}</p>
+                        </div>
+                      </label>
+                    ))}
+                  </div>
                 </div>
               )}
               {!editingUser && (
