@@ -38,7 +38,8 @@ export interface Student {
   enrolledTeachers: string[];
   subjects: string[];
   avatar: string;
-  educationLevel: string;
+  academicLevel: 'Primary' | 'Preparatory' | 'Secondary';
+  academicYear: string;
   avgScore: number;
   missingDays: number;
 }
@@ -156,16 +157,16 @@ export const users: User[] = [
 
 // Students (Al-Nour primarily)
 export const students: Student[] = [
-  { id: 's1', name: 'Ali Mohamed', username: 'ali.mohamed.2026', email: 'ali@student.edu', phone: '+20 10 1111 1111', parentPhone: '+20 12 1111 0000', centerId: 'alnour', joinedDate: 'Jan 15, 2026', enrolledTeachers: ['u6', 'u7'], subjects: ['Mathematics', 'Physics'], avatar: 'AM', educationLevel: 'Secondary', avgScore: 82, missingDays: 3 },
-  { id: 's2', name: 'Fatma Ibrahim', username: 'fatma.ibrahim.2026', email: 'fatma@student.edu', phone: '+20 10 2222 2222', parentPhone: '+20 12 2222 0000', centerId: 'alnour', joinedDate: 'Jan 18, 2026', enrolledTeachers: ['u6'], subjects: ['Mathematics'], avatar: 'FI', educationLevel: 'Secondary', avgScore: 88, missingDays: 1 },
-  { id: 's3', name: 'Youssef Samir', username: 'youssef.samir.2026', email: 'youssef@student.edu', phone: '+20 10 3333 3333', parentPhone: '+20 12 3333 0000', centerId: 'alnour', joinedDate: 'Jan 20, 2026', enrolledTeachers: ['u7', 'u8'], subjects: ['Physics', 'Chemistry'], avatar: 'YS', educationLevel: 'Preparatory', avgScore: 71, missingDays: 5 },
-  { id: 's4', name: 'Nour Ahmed', username: 'nour.ahmed.2026', email: 'nour@student.edu', phone: '+20 10 4444 4444', parentPhone: '+20 12 4444 0000', centerId: 'alnour', joinedDate: 'Feb 1, 2026', enrolledTeachers: ['u6'], subjects: ['Mathematics'], avatar: 'NA', educationLevel: 'Primary', avgScore: 75, missingDays: 2 },
-  { id: 's5', name: 'Mona Hassan', username: 'mona.hassan.2026', email: 'mona@student.edu', phone: '+20 10 5555 5555', parentPhone: '+20 12 5555 0000', centerId: 'alnour', joinedDate: 'Feb 3, 2026', enrolledTeachers: ['u8'], subjects: ['Chemistry'], avatar: 'MH', educationLevel: 'Secondary', avgScore: 79, missingDays: 0 },
-  { id: 's6', name: 'Khaled Omar', username: 'khaled.omar.2026', email: 'khaled@student.edu', phone: '+20 10 6666 6666', parentPhone: '+20 12 6666 0000', centerId: 'alnour', joinedDate: 'Feb 5, 2026', enrolledTeachers: ['u6', 'u7', 'u8'], subjects: ['Mathematics', 'Physics', 'Chemistry'], avatar: 'KO', educationLevel: 'Preparatory', avgScore: 85, missingDays: 4 },
-  { id: 's7', name: 'Dina Saad', username: 'dina.saad.2026', email: 'dina@student.edu', phone: '+20 10 7777 7777', parentPhone: '+20 12 7777 0000', centerId: 'alnour', joinedDate: 'Feb 8, 2026', enrolledTeachers: ['u7'], subjects: ['Physics'], avatar: 'DS', educationLevel: 'Primary', avgScore: 67, missingDays: 6 },
-  { id: 's8', name: 'Tarek Hosny', username: 'tarek.hosny.2026', email: 'tarek@student.edu', phone: '+20 10 8888 8888', parentPhone: '+20 12 8888 0000', centerId: 'alnour', joinedDate: 'Feb 10, 2026', enrolledTeachers: ['u6'], subjects: ['Mathematics'], avatar: 'TH', educationLevel: 'Secondary', avgScore: 55, missingDays: 8 },
-  { id: 's9', name: 'Salma Adel', username: 'salma.adel.2026', email: 'salma@student.edu', phone: '+20 10 9999 0000', parentPhone: '+20 12 9999 0000', centerId: 'alnour', joinedDate: 'Feb 12, 2026', enrolledTeachers: ['u9'], subjects: ['English'], avatar: 'SA', educationLevel: 'Preparatory', avgScore: 90, missingDays: 1 },
-  { id: 's10', name: 'Hassan Magdy', username: 'hassan.magdy.2026', email: 'hassan@student.edu', phone: '+20 10 0000 1111', parentPhone: '+20 12 0000 1111', centerId: 'alnour', joinedDate: 'Feb 15, 2026', enrolledTeachers: ['u6', 'u10'], subjects: ['Mathematics', 'Biology'], avatar: 'HM', educationLevel: 'Primary', avgScore: 68, missingDays: 3 },
+  { id: 's1', name: 'Ali Mohamed', username: 'ali.mohamed.2026', email: 'ali@student.edu', phone: '+20 10 1111 1111', parentPhone: '+20 12 1111 0000', centerId: 'alnour', joinedDate: 'Jan 15, 2026', enrolledTeachers: ['u6', 'u7'], subjects: ['Mathematics', 'Physics'], avatar: 'AM', academicLevel: 'Secondary', academicYear: '1st', avgScore: 82, missingDays: 3 },
+  { id: 's2', name: 'Fatma Ibrahim', username: 'fatma.ibrahim.2026', email: 'fatma@student.edu', phone: '+20 10 2222 2222', parentPhone: '+20 12 2222 0000', centerId: 'alnour', joinedDate: 'Jan 18, 2026', enrolledTeachers: ['u6'], subjects: ['Mathematics'], avatar: 'FI', academicLevel: 'Secondary', academicYear: '2nd', avgScore: 88, missingDays: 1 },
+  { id: 's3', name: 'Youssef Samir', username: 'youssef.samir.2026', email: 'youssef@student.edu', phone: '+20 10 3333 3333', parentPhone: '+20 12 3333 0000', centerId: 'alnour', joinedDate: 'Jan 20, 2026', enrolledTeachers: ['u7', 'u8'], subjects: ['Physics', 'Chemistry'], avatar: 'YS', academicLevel: 'Preparatory', academicYear: '2nd', avgScore: 71, missingDays: 5 },
+  { id: 's4', name: 'Nour Ahmed', username: 'nour.ahmed.2026', email: 'nour@student.edu', phone: '+20 10 4444 4444', parentPhone: '+20 12 4444 0000', centerId: 'alnour', joinedDate: 'Feb 1, 2026', enrolledTeachers: ['u6'], subjects: ['Mathematics'], avatar: 'NA', academicLevel: 'Primary', academicYear: '4th', avgScore: 75, missingDays: 2 },
+  { id: 's5', name: 'Mona Hassan', username: 'mona.hassan.2026', email: 'mona@student.edu', phone: '+20 10 5555 5555', parentPhone: '+20 12 5555 0000', centerId: 'alnour', joinedDate: 'Feb 3, 2026', enrolledTeachers: ['u8'], subjects: ['Chemistry'], avatar: 'MH', academicLevel: 'Secondary', academicYear: '3rd', avgScore: 79, missingDays: 0 },
+  { id: 's6', name: 'Khaled Omar', username: 'khaled.omar.2026', email: 'khaled@student.edu', phone: '+20 10 6666 6666', parentPhone: '+20 12 6666 0000', centerId: 'alnour', joinedDate: 'Feb 5, 2026', enrolledTeachers: ['u6', 'u7', 'u8'], subjects: ['Mathematics', 'Physics', 'Chemistry'], avatar: 'KO', academicLevel: 'Preparatory', academicYear: '1st', avgScore: 85, missingDays: 4 },
+  { id: 's7', name: 'Dina Saad', username: 'dina.saad.2026', email: 'dina@student.edu', phone: '+20 10 7777 7777', parentPhone: '+20 12 7777 0000', centerId: 'alnour', joinedDate: 'Feb 8, 2026', enrolledTeachers: ['u7'], subjects: ['Physics'], avatar: 'DS', academicLevel: 'Primary', academicYear: '3rd', avgScore: 67, missingDays: 6 },
+  { id: 's8', name: 'Tarek Hosny', username: 'tarek.hosny.2026', email: 'tarek@student.edu', phone: '+20 10 8888 8888', parentPhone: '+20 12 8888 0000', centerId: 'alnour', joinedDate: 'Feb 10, 2026', enrolledTeachers: ['u6'], subjects: ['Mathematics'], avatar: 'TH', academicLevel: 'Secondary', academicYear: '1st', avgScore: 55, missingDays: 8 },
+  { id: 's9', name: 'Salma Adel', username: 'salma.adel.2026', email: 'salma@student.edu', phone: '+20 10 9999 0000', parentPhone: '+20 12 9999 0000', centerId: 'alnour', joinedDate: 'Feb 12, 2026', enrolledTeachers: ['u9'], subjects: ['English'], avatar: 'SA', academicLevel: 'Preparatory', academicYear: '3rd', avgScore: 90, missingDays: 1 },
+  { id: 's10', name: 'Hassan Magdy', username: 'hassan.magdy.2026', email: 'hassan@student.edu', phone: '+20 10 0000 1111', parentPhone: '+20 12 0000 1111', centerId: 'alnour', joinedDate: 'Feb 15, 2026', enrolledTeachers: ['u6', 'u10'], subjects: ['Mathematics', 'Biology'], avatar: 'HM', academicLevel: 'Primary', academicYear: '5th', avgScore: 68, missingDays: 3 },
 ];
 
 // Subjects (new - grouped by academic level)
@@ -340,4 +341,8 @@ export function getTeacherName(teacherId: string) {
 
 export function getSubjectsForTeacher(teacherId: string) {
   return subjects.filter(s => s.teacherId === teacherId);
+}
+
+export function formatEducationLevel(academicLevel: string, academicYear: string): string {
+  return `${academicLevel} – ${academicYear} Year`;
 }

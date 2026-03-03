@@ -5,7 +5,7 @@ import DashboardLayout from '@/components/DashboardLayout';
 import StatCard from '@/components/StatCard';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { getStudentsForCenter, getTeachersForCenter, students as allStudents, studentsPerTeacher, moderatorActivities, users } from '@/data/mockData';
+import { getStudentsForCenter, getTeachersForCenter, students as allStudents, studentsPerTeacher, moderatorActivities, users, formatEducationLevel } from '@/data/mockData';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 
 const CHART_COLORS = ['hsl(217,91%,53%)', 'hsl(216,57%,25%)', 'hsl(199,89%,48%)', 'hsl(142,71%,45%)', 'hsl(38,92%,50%)'];
@@ -17,7 +17,12 @@ const navItems = [
   { label: 'Activity', icon: Activity },
 ];
 
-const EDUCATION_LEVELS = ['Primary', 'Preparatory', 'Secondary'];
+const EDUCATION_LEVELS = ['Primary', 'Preparatory', 'Secondary'] as const;
+const YEAR_OPTIONS: Record<string, string[]> = {
+  'Primary': ['1st', '2nd', '3rd', '4th', '5th', '6th'],
+  'Preparatory': ['1st', '2nd', '3rd'],
+  'Secondary': ['1st', '2nd', '3rd'],
+};
 
 export default function ModeratorDashboard() {
   const [tab, setTab] = useState('Overview');
@@ -28,7 +33,7 @@ export default function ModeratorDashboard() {
   const [teacherFilter, setTeacherFilter] = useState('all');
   const [addStudentOpen, setAddStudentOpen] = useState(false);
   const [addStudentStep, setAddStudentStep] = useState(1);
-  const [studentForm, setStudentForm] = useState({ name: '', email: '', phone: '', educationLevel: 'Secondary', parentPhone: '' });
+  const [studentForm, setStudentForm] = useState({ name: '', email: '', phone: '', academicLevel: 'Secondary' as string, academicYear: '1st', parentPhone: '' });
   const [selectedTeachers, setSelectedTeachers] = useState<string[]>([]);
   const [addTeacherModal, setAddTeacherModal] = useState<string | null>(null); // student id
 
@@ -54,7 +59,7 @@ export default function ModeratorDashboard() {
     toast({ title: 'Student Created!', description: 'Student account created. Share credentials with the student.' });
     setAddStudentOpen(false);
     setAddStudentStep(1);
-    setStudentForm({ name: '', email: '', phone: '', educationLevel: 'Secondary', parentPhone: '' });
+    setStudentForm({ name: '', email: '', phone: '', academicLevel: 'Secondary', academicYear: '1st', parentPhone: '' });
     setSelectedTeachers([]);
   };
 
@@ -184,7 +189,7 @@ export default function ModeratorDashboard() {
                         <span className="font-medium text-foreground">{s.name}</span>
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-muted-foreground text-xs">{s.educationLevel}</td>
+                    <td className="px-4 py-3 text-muted-foreground text-xs">{formatEducationLevel(s.academicLevel, s.academicYear)}</td>
                     <td className="px-4 py-3 text-muted-foreground text-xs">
                       {s.enrolledTeachers.map(tid => displayTeachers.find(t => t.id === tid)?.name || allTeachers.find(t => t.id === tid)?.name || tid).join(', ')}
                     </td>
@@ -325,9 +330,15 @@ export default function ModeratorDashboard() {
                     <input value={studentForm.phone} onChange={e => setStudentForm(f => ({ ...f, phone: e.target.value }))} className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground text-sm focus:ring-2 focus:ring-secondary focus:outline-none" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-muted-foreground mb-1">Education Level *</label>
-                    <select value={studentForm.educationLevel} onChange={e => setStudentForm(f => ({ ...f, educationLevel: e.target.value }))} className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground text-sm focus:ring-2 focus:ring-secondary focus:outline-none">
+                    <label className="block text-sm font-medium text-muted-foreground mb-1">Academic Level *</label>
+                    <select value={studentForm.academicLevel} onChange={e => setStudentForm(f => ({ ...f, academicLevel: e.target.value, academicYear: YEAR_OPTIONS[e.target.value][0] }))} className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground text-sm focus:ring-2 focus:ring-secondary focus:outline-none">
                       {EDUCATION_LEVELS.map(l => <option key={l} value={l}>{l}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-muted-foreground mb-1">Academic Year *</label>
+                    <select value={studentForm.academicYear} onChange={e => setStudentForm(f => ({ ...f, academicYear: e.target.value }))} className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground text-sm focus:ring-2 focus:ring-secondary focus:outline-none">
+                      {YEAR_OPTIONS[studentForm.academicLevel].map(y => <option key={y} value={y}>{y}</option>)}
                     </select>
                   </div>
                   <div>
@@ -365,7 +376,7 @@ export default function ModeratorDashboard() {
                     <p><span className="text-muted-foreground">Name:</span> <span className="font-medium text-foreground">{studentForm.name}</span></p>
                     <p><span className="text-muted-foreground">Email:</span> <span className="font-medium text-foreground">{studentForm.email}</span></p>
                     <p><span className="text-muted-foreground">Phone:</span> <span className="font-medium text-foreground">{studentForm.phone || 'N/A'}</span></p>
-                    <p><span className="text-muted-foreground">Education Level:</span> <span className="font-medium text-foreground">{studentForm.educationLevel}</span></p>
+                    <p><span className="text-muted-foreground">Education Level:</span> <span className="font-medium text-foreground">{formatEducationLevel(studentForm.academicLevel, studentForm.academicYear)}</span></p>
                     <p><span className="text-muted-foreground">Parent Phone:</span> <span className="font-medium text-foreground">{studentForm.parentPhone || 'N/A'}</span></p>
                     <p><span className="text-muted-foreground">Teachers:</span> <span className="font-medium text-foreground">{selectedTeachers.map(id => displayTeachers.find(t => t.id === id)?.name || allTeachers.find(t => t.id === id)?.name).join(', ')}</span></p>
                   </div>
