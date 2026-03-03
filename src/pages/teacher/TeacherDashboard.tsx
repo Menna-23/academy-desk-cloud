@@ -18,12 +18,12 @@ const navItems = [
 ];
 
 const teacherStudents = [
-  { id: 's1', name: 'Ali Mohamed', avatar: 'AM', lessonsCompleted: 3, avgScore: 82, lastActive: 'Today' },
-  { id: 's2', name: 'Fatma Ibrahim', avatar: 'FI', lessonsCompleted: 4, avgScore: 88, lastActive: 'Yesterday' },
-  { id: 's4', name: 'Nour Ahmed', avatar: 'NA', lessonsCompleted: 2, avgScore: 71, lastActive: '2 days ago' },
-  { id: 's6', name: 'Khaled Omar', avatar: 'KO', lessonsCompleted: 4, avgScore: 85, lastActive: 'Today' },
-  { id: 's8', name: 'Tarek Hosny', avatar: 'TH', lessonsCompleted: 1, avgScore: 55, lastActive: '1 week ago' },
-  { id: 's10', name: 'Hassan Magdy', avatar: 'HM', lessonsCompleted: 2, avgScore: 68, lastActive: '3 days ago' },
+  { id: 's1', name: 'Ali Mohamed', avatar: 'AM', lessonsCompleted: 3, avgScore: 82, lastActive: 'Today', educationLevel: 'Secondary – 1st Year' },
+  { id: 's2', name: 'Fatma Ibrahim', avatar: 'FI', lessonsCompleted: 4, avgScore: 88, lastActive: 'Yesterday', educationLevel: 'Secondary – 2nd Year' },
+  { id: 's4', name: 'Nour Ahmed', avatar: 'NA', lessonsCompleted: 2, avgScore: 71, lastActive: '2 days ago', educationLevel: 'Primary – 4th Year' },
+  { id: 's6', name: 'Khaled Omar', avatar: 'KO', lessonsCompleted: 4, avgScore: 85, lastActive: 'Today', educationLevel: 'Preparatory – 1st Year' },
+  { id: 's8', name: 'Tarek Hosny', avatar: 'TH', lessonsCompleted: 1, avgScore: 55, lastActive: '1 week ago', educationLevel: 'Secondary – 1st Year' },
+  { id: 's10', name: 'Hassan Magdy', avatar: 'HM', lessonsCompleted: 2, avgScore: 68, lastActive: '3 days ago', educationLevel: 'Primary – 5th Year' },
 ];
 
 const gradesData = [
@@ -192,7 +192,8 @@ export default function TeacherDashboard() {
           <div className="bg-card rounded-lg shadow-card border border-border overflow-hidden">
             <table className="w-full text-sm">
               <thead><tr className="border-b border-border bg-muted/50">
-                <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Student</th>
+               <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Student</th>
+                <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Education Level</th>
                 <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Lessons Completed</th>
                 <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Avg Score</th>
                 <th className="text-left px-4 py-3 font-semibold text-muted-foreground">Last Active</th>
@@ -206,6 +207,7 @@ export default function TeacherDashboard() {
                         <span className="font-medium text-foreground">{s.name}</span>
                       </div>
                     </td>
+                    <td className="px-4 py-3 text-muted-foreground text-xs">{s.educationLevel}</td>
                     <td className="px-4 py-3 text-muted-foreground">{s.lessonsCompleted}/4</td>
                     <td className="px-4 py-3"><span className={`font-semibold ${scoreColor(s.avgScore)}`}>{s.avgScore}%</span></td>
                     <td className="px-4 py-3 text-muted-foreground">{s.lastActive}</td>

@@ -67,7 +67,7 @@ export default function StudentProfile() {
               <span>Joined {student.joinedDate}</span>
             </div>
             <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mt-1">
-              <span><span className="font-medium text-foreground">Education Level:</span> {student.educationLevel}</span>
+              <span><span className="font-medium text-foreground">Education Level:</span> {student.academicLevel} – {student.academicYear} Year</span>
               <span><span className="font-medium text-foreground">Parent Phone:</span> {student.parentPhone}</span>
             </div>
           </div>
