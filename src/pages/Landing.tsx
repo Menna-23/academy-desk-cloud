@@ -73,13 +73,10 @@ const Landing = () => {
           </div>
           <div className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
             <a href="#features" className="hover:text-foreground transition">Features</a>
-            <a href="#stats" className="hover:text-foreground transition">Stats</a>
             <a href="#about" className="hover:text-foreground transition">About</a>
             <a href="#faq" className="hover:text-foreground transition">FAQ</a>
           </div>
-          <Button onClick={() => navigate("/login")} variant="outline" size="sm">
-            Login
-          </Button>
+          <div />
         </div>
       </nav>
 
@@ -183,7 +180,7 @@ const Landing = () => {
             <Button size="lg" className="bg-secondary text-secondary-foreground hover:bg-secondary/90">
               Contact Sales
             </Button>
-            <Button size="lg" variant="outline" className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10">
+            <Button size="lg" className="bg-secondary text-secondary-foreground hover:bg-secondary/90">
               Technical Support
             </Button>
           </div>
