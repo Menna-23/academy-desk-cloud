@@ -76,9 +76,7 @@ const Landing = () => {
             <a href="#about" className="hover:text-foreground transition">About</a>
             <a href="#faq" className="hover:text-foreground transition">FAQ</a>
           </div>
-          <Button onClick={() => navigate("/login")} variant="outline" size="sm">
-            Login
-          </Button>
+          <div />
         </div>
       </nav>
 
@@ -182,7 +180,7 @@ const Landing = () => {
             <Button size="lg" className="bg-secondary text-secondary-foreground hover:bg-secondary/90">
               Contact Sales
             </Button>
-            <Button size="lg" variant="outline" className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10">
+            <Button size="lg" className="bg-secondary text-secondary-foreground hover:bg-secondary/90">
               Technical Support
             </Button>
           </div>
