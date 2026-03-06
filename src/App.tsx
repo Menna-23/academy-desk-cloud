@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import ModeratorDashboard from "./pages/moderator/ModeratorDashboard";
@@ -27,7 +28,8 @@ function AppRoutes() {
 
   return (
     <Routes>
-      <Route path="/" element={user ? <Navigate to={`/${user.role}`} replace /> : <Login />} />
+      <Route path="/" element={user ? <Navigate to={`/${user.role}`} replace /> : <Landing />} />
+      <Route path="/login" element={user ? <Navigate to={`/${user.role}`} replace /> : <Login />} />
       <Route path="/admin" element={<ProtectedRoute role="admin"><AdminDashboard /></ProtectedRoute>} />
       <Route path="/moderator" element={<ProtectedRoute role="moderator"><ModeratorDashboard /></ProtectedRoute>} />
       <Route path="/moderator/students/:id" element={<ProtectedRoute role="moderator"><StudentProfile /></ProtectedRoute>} />
