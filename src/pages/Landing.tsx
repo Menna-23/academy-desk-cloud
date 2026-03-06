@@ -71,12 +71,11 @@ const Landing = () => {
             </div>
             <span className="text-xl font-bold text-foreground">EduCore</span>
           </div>
-          <div className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
+          <div className="hidden md:flex items-center gap-8 text-sm text-muted-foreground ml-auto">
             <a href="#features" className="hover:text-foreground transition">Features</a>
             <a href="#about" className="hover:text-foreground transition">About</a>
             <a href="#faq" className="hover:text-foreground transition">FAQ</a>
           </div>
-          <div />
         </div>
       </nav>
 
