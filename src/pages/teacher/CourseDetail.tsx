@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, BarChart2, X, Plus, Upload, Trash2 } from 'lucide-react';
+import { ArrowLeft, BarChart2, X, Plus, Upload, PenLine, Sparkles } from 'lucide-react';
 import DashboardLayout from '@/components/DashboardLayout';
 import StatusBadge from '@/components/StatusBadge';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { courses, lessons, lessonStats } from '@/data/mockData';
 import { LayoutDashboard, BookOpen, Users, Award, FileQuestion } from 'lucide-react';
+import TestQuestionCard, { type TestQuestion, type QuestionType, emptyQuestion } from '@/components/teacher/TestQuestionCard';
+import AITestGenerator from '@/components/teacher/AITestGenerator';
 
 const navItems = [
   { label: 'Overview', icon: LayoutDashboard },
