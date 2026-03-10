@@ -27,8 +27,8 @@ export default function CourseDetail() {
   const [statsModalOpen, setStatsModalOpen] = useState(false);
   const [selectedLesson, setSelectedLesson] = useState<string | null>(null);
   const [addLessonOpen, setAddLessonOpen] = useState(false);
-  const [entryTestEnabled, setEntryTestEnabled] = useState(false);
-  const [testQuestions, setTestQuestions] = useState<TestQuestion[]>([emptyQuestion()]);
+  const [testCreationMode, setTestCreationMode] = useState<TestCreationMode>('manual');
+  const [aiQuestionsGenerated, setAiQuestionsGenerated] = useState(false);
   const [passingScore, setPassingScore] = useState(60);
   const [retakeInterval, setRetakeInterval] = useState(24);
 
