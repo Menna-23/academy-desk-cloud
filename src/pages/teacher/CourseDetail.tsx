@@ -18,23 +18,7 @@ const navItems = [
   { label: 'Requests', icon: FileQuestion },
 ];
 
-type QuestionType = 'multiple_choice' | 'true_false' | 'short_answer';
-
-interface TestQuestion {
-  id: string;
-  type: QuestionType;
-  question: string;
-  options: string[];
-  correctAnswer: string;
-}
-
-const emptyQuestion = (): TestQuestion => ({
-  id: crypto.randomUUID(),
-  type: 'multiple_choice',
-  question: '',
-  options: ['', '', '', ''],
-  correctAnswer: '',
-});
+type TestCreationMode = 'manual' | 'ai';
 
 export default function CourseDetail() {
   const { id } = useParams();
