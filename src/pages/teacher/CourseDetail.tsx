@@ -269,105 +269,64 @@ export default function CourseDetail() {
               </div>
               {entryTestEnabled && (
                 <div className="bg-muted rounded-lg p-4 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm font-semibold text-foreground">Test Questions</p>
-                    <button type="button" onClick={addQuestion} className="inline-flex items-center gap-1 text-xs text-secondary font-medium hover:underline">
-                      <Plus className="w-3.5 h-3.5" /> Add Question
+                  {/* Mode selector */}
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => { setTestCreationMode('manual'); setAiQuestionsGenerated(false); setTestQuestions([emptyQuestion()]); }}
+                      className={`flex-1 inline-flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-semibold border transition ${
+                        testCreationMode === 'manual'
+                          ? 'border-secondary bg-accent text-secondary'
+                          : 'border-border bg-background text-muted-foreground hover:bg-muted/50'
+                      }`}
+                    >
+                      <PenLine className="w-4 h-4" /> Create Manually
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setTestCreationMode('ai'); setAiQuestionsGenerated(false); setTestQuestions([emptyQuestion()]); }}
+                      className={`flex-1 inline-flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-semibold border transition ${
+                        testCreationMode === 'ai'
+                          ? 'border-secondary bg-accent text-secondary'
+                          : 'border-border bg-background text-muted-foreground hover:bg-muted/50'
+                      }`}
+                    >
+                      <Sparkles className="w-4 h-4" /> Create with AI
                     </button>
                   </div>
 
-                  {testQuestions.map((q, qi) => (
-                    <div key={q.id} className="bg-background rounded-lg p-4 border border-border space-y-3">
+                  {/* AI Generator */}
+                  {testCreationMode === 'ai' && !aiQuestionsGenerated && (
+                    <AITestGenerator onGenerated={handleAIGenerated} />
+                  )}
+
+                  {/* Questions list (manual mode OR after AI generation) */}
+                  {(testCreationMode === 'manual' || aiQuestionsGenerated) && (
+                    <>
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-semibold text-muted-foreground">Question {qi + 1}</span>
-                        {testQuestions.length > 1 && (
-                          <button type="button" onClick={() => removeQuestion(q.id)} className="p-1 rounded hover:bg-muted transition text-status-failed">
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        )}
+                        <p className="text-sm font-semibold text-foreground">
+                          {aiQuestionsGenerated ? 'Review Generated Questions' : 'Test Questions'}
+                        </p>
+                        <button type="button" onClick={addQuestion} className="inline-flex items-center gap-1 text-xs text-secondary font-medium hover:underline">
+                          <Plus className="w-3.5 h-3.5" /> Add Question
+                        </button>
                       </div>
-
-                      <div>
-                        <label className="block text-xs text-muted-foreground mb-1">Question Type</label>
-                        <select
-                          value={q.type}
-                          onChange={e => updateQuestion(q.id, { type: e.target.value as QuestionType })}
-                          className="w-full px-2 py-1.5 rounded border border-border bg-background text-foreground text-sm focus:ring-2 focus:ring-secondary focus:outline-none"
-                        >
-                          <option value="multiple_choice">Multiple Choice</option>
-                          <option value="true_false">True / False</option>
-                          <option value="short_answer">Short Answer</option>
-                        </select>
-                      </div>
-
-                      <div>
-                        <label className="block text-xs text-muted-foreground mb-1">Question Text *</label>
-                        <input
-                          value={q.question}
-                          onChange={e => updateQuestion(q.id, { question: e.target.value })}
-                          placeholder="Enter question..."
-                          className="w-full px-2 py-1.5 rounded border border-border bg-background text-foreground text-sm focus:ring-2 focus:ring-secondary focus:outline-none"
+                      {aiQuestionsGenerated && (
+                        <p className="text-xs text-muted-foreground -mt-2">Review, edit, or remove questions before saving.</p>
+                      )}
+                      {testQuestions.map((q, qi) => (
+                        <TestQuestionCard
+                          key={q.id}
+                          question={q}
+                          index={qi}
+                          canDelete={testQuestions.length > 1}
+                          onUpdate={updateQuestion}
+                          onUpdateOption={updateOption}
+                          onRemove={removeQuestion}
                         />
-                      </div>
-
-                      {q.type === 'multiple_choice' && (
-                        <div className="space-y-2">
-                          <label className="block text-xs text-muted-foreground">Answer Options</label>
-                          {q.options.map((opt, oi) => (
-                            <div key={oi} className="flex items-center gap-2">
-                              <input
-                                type="radio"
-                                name={`correct-${q.id}`}
-                                checked={q.correctAnswer === opt && opt !== ''}
-                                onChange={() => updateQuestion(q.id, { correctAnswer: opt })}
-                                className="accent-secondary"
-                                title="Mark as correct"
-                              />
-                              <input
-                                value={opt}
-                                onChange={e => updateOption(q.id, oi, e.target.value)}
-                                placeholder={`Option ${oi + 1}`}
-                                className="flex-1 px-2 py-1 rounded border border-border bg-background text-foreground text-sm focus:ring-2 focus:ring-secondary focus:outline-none"
-                              />
-                            </div>
-                          ))}
-                          <p className="text-[10px] text-muted-foreground">Select the radio button next to the correct answer.</p>
-                        </div>
-                      )}
-
-                      {q.type === 'true_false' && (
-                        <div className="space-y-2">
-                          <label className="block text-xs text-muted-foreground">Correct Answer</label>
-                          <div className="flex gap-3">
-                            {['True', 'False'].map(val => (
-                              <label key={val} className={`flex items-center gap-2 px-4 py-2 rounded-lg border cursor-pointer transition ${q.correctAnswer === val ? 'border-secondary bg-accent' : 'border-border hover:bg-muted/50'}`}>
-                                <input
-                                  type="radio"
-                                  name={`tf-${q.id}`}
-                                  checked={q.correctAnswer === val}
-                                  onChange={() => updateQuestion(q.id, { correctAnswer: val })}
-                                  className="accent-secondary"
-                                />
-                                <span className="text-sm text-foreground">{val}</span>
-                              </label>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {q.type === 'short_answer' && (
-                        <div>
-                          <label className="block text-xs text-muted-foreground mb-1">Correct Answer *</label>
-                          <input
-                            value={q.correctAnswer}
-                            onChange={e => updateQuestion(q.id, { correctAnswer: e.target.value })}
-                            placeholder="Expected answer..."
-                            className="w-full px-2 py-1.5 rounded border border-border bg-background text-foreground text-sm focus:ring-2 focus:ring-secondary focus:outline-none"
-                          />
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                      ))}
+                    </>
+                  )}
 
                   <div className="grid grid-cols-2 gap-3 pt-2">
                     <div>
